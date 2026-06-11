@@ -35,21 +35,18 @@ def insert_favorito():
     with driver.session() as session:
         session.run(
             """
-            CREATE (f:Favorito {
-                id: randomUUID(),
-                usuario_id: $usuario_id,
-                produto_id: $produto_id,
-                usuario_nome: $usuario_nome,
-                produto_nome: $produto_nome,
-                produto_descricao: $produto_descricao,
-                produto_preco: $produto_preco
-            })
+            MATCH (u:Usuario {id: $usuario_id})
+            MATCH (p:Produto {id: $produto_id})
+            CREATE (f:Favorito {id: randomUUID(), usuario_nome: $usuario_nome, produto_nome: $produto_nome, produto_descricao: $produto_descricao, produto_preco: $produto_preco})
+            CREATE (u)-[:FAVORITOU]->(p)
+            CREATE (f)-[:CONTEM]->(p)
+            CREATE (f)-[:ADICIONADO_POR]->(u)
             """,
             usuario_id=usuario["id"], produto_id=produto["id"],
             usuario_nome=usuario["nome"], produto_nome=produto["nome"],
             produto_descricao=produto["descricao"], produto_preco=produto["preco"]
         )
-    print(f"Favorito adicionado: {usuario['nome']} -> {produto['nome']}")
+    print(f"{usuario['nome']} adicionou {produto['nome']} aos seus favoritos")
 
 def read_table_favorito():
     with driver.session() as session:

@@ -18,27 +18,12 @@ def menu_crud(col):
         print(f"\n{col.upper()}")
         print(f"1. Criar {col}")
         print(f"2. Ler {col}")
-        # print(f"3. Atualizar {col}")
-        # if update:
-            # print(f"4. Deletar {col}")
-        # else:
-            # print(f"3. Deletar {col}")
         print(f"0. Voltar")
         option = int(input("Escolha uma opção: "))
         if option == 1:
             create()
         elif option == 2:
             read()
-        # elif option == 3:
-            # if update:
-            # update()
-            # else:
-            #     if delete:
-            #         delete()
-            #     else:
-            #         print("Opção inválida")
-        # elif option == 4 and update:
-        #     delete()
         elif option == 0:
             break
         else:

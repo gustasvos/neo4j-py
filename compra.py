@@ -20,16 +20,6 @@ def insert_compra():
         print('Índice inválido')
         return
 
-    print('Selecione o vendedor:\n')
-    vendedores = read_table_vendedor()
-    if not vendedores:
-        print('Nenhum vendedor encontrado')
-        return
-    i_vendedor = int(input('Índice do vendedor: '))
-    if i_vendedor < 1 or i_vendedor > len(vendedores):
-        print('Índice inválido')
-        return
-
     print('Selecione o produto:\n')
     produtos = read_table_produto()
     if not produtos:
@@ -41,7 +31,6 @@ def insert_compra():
         return
 
     usuario = usuarios[i_usuario - 1]
-    vendedor = vendedores[i_vendedor - 1]
     produto = produtos[i_produto - 1]
 
     try:
@@ -55,24 +44,17 @@ def insert_compra():
     with driver.session() as session:
         session.run(
             """
-            CREATE (c:Compra {
-                id: randomUUID(),
-                usuario_id: $usuario_id,
-                vendedor_id: $vendedor_id,
-                produto_id: $produto_id,
-                usuario_nome: $usuario_nome,
-                vendedor_nome: $vendedor_nome,
-                produto_nome: $produto_nome,
-                produto_preco: $produto_preco,
-                frete: $frete,
-                valor: $valor
-            })
+            MATCH (u:Usuario {id: $usuario_id})
+            MATCH (p:Produto {id: $produto_id})
+            MATCH (v:Vendedor)-[:POSSUI]->(p)
+            CREATE (c:Compra {id: randomUUID(), frete: $frete, valor: $valor})
+            CREATE (u)-[:REALIZOU]->(c)
+            CREATE (c)-[:CONTEM]->(p)
+            CREATE (c)-[:VENDIDO_POR]->(v)
             """,
-            usuario_id=usuario["id"], vendedor_id=vendedor["id"], produto_id=produto["id"],
-            usuario_nome=usuario["nome"], vendedor_nome=vendedor["nome"], produto_nome=produto["nome"],
-            produto_preco=produto["preco"], frete=frete, valor=valor
+            usuario_id=usuario["id"], produto_id=produto["id"], frete=frete, valor=valor
         )
-    print(f"Compra registrada: {usuario['nome']} comprou {produto['nome']} de {vendedor['nome']} por R${valor:.2f}")
+    print(f"Compra registrada: {usuario['nome']} comprou {produto['nome']} por R${valor:.2f}")
 
 def read_table_compra():
     with driver.session() as session:
